@@ -25,10 +25,10 @@ namespace Mono.Debugger.Soft
 	public class ObjectMirror : Value {
 		TypeMirror type;
 		AppDomainMirror domain;
-	
+
 		internal ObjectMirror (VirtualMachine vm, long id) : base (vm, id) {
 		}
-	
+
 		internal ObjectMirror (VirtualMachine vm, long id, TypeMirror type, AppDomainMirror domain) : base (vm, id) {
 			this.type = type;
 			this.domain = domain;
@@ -132,9 +132,9 @@ namespace Mono.Debugger.Soft
 		}
 
 		/*
-		 * The current address of the object. It can change during garbage 
-		 * collections. Use a long since the debuggee might have a different 
-		 * pointer size. 
+		 * The current address of the object. It can change during garbage
+		 * collections. Use a long since the debuggee might have a different
+		 * pointer size.
 		 */
 		public long Address {
 			get {
@@ -218,7 +218,7 @@ namespace Mono.Debugger.Soft
 			public bool IsMultiple {
 				get; set;
 			}
-			   
+
 			public int NumPending;
 
 			public void Abort ()
@@ -311,6 +311,9 @@ namespace Mono.Debugger.Soft
 				if (r.Exception != null)
 					return new InvokeResult () { Exception = (ObjectMirror)r.VM.DecodeValue (r.Exception) };
 
+				//refresh frames from thread after running an invoke
+				r.Thread.GetFrames();
+
 				Value out_this = null;
 				if (r.OutThis != null)
 					out_this = r.VM.DecodeValue (r.OutThis);
@@ -322,7 +325,7 @@ namespace Mono.Debugger.Soft
 			}
 		}
 
-	    internal static void EndInvokeMultipleInternal (IAsyncResult asyncResult) {
+		internal static void EndInvokeMultipleInternal (IAsyncResult asyncResult) {
 			if (asyncResult == null)
 				throw new ArgumentNullException ("asyncResult");
 

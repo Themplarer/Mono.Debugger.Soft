@@ -30,8 +30,6 @@
   <ItemGroup>
     <Compile Remove="Mono.Debugger.Soft\InvocationException.cs" />
     <None Include="Mono.Debugger.Soft\InvocationException.cs" />
-    <Compile Remove="Mono.Debugger.Soft\PointerValue.cs" />
-    <None Include="Mono.Debugger.Soft\PointerValue.cs" />
     <Compile Remove="Mono.Debugger.Soft\ILInstruction.cs" />
     <Compile Remove="Mono.Debugger.Soft\ILInterpreter.cs" />
     <Compile Remove="Test\*" />

@@ -58,7 +58,7 @@ namespace Mono.Debugger.Soft
 			get {
 				if (module == null) {
 					module = vm.GetModule (GetInfo ().module);
-				}										   
+				}
 				return module;
 			}
 		}
@@ -352,20 +352,18 @@ namespace Mono.Debugger.Soft
 		public string CSharpName {
 			get {
 				if (IsArray) {
-					if (GetArrayRank () == 1)
+					var ranks = GetArrayRank ();
+
+					if (ranks == 1)
 						return GetElementType ().CSharpName + "[]";
-					else {
-						string ranks = "";
-						for (int i = 0; i < GetArrayRank (); ++i)
-							ranks += ',';
-						return GetElementType ().CSharpName + "[" + ranks + "]";
-					}
+
+					return GetElementType ().CSharpName + "[" + new string(',', ranks - 1) + "]";
 				}
 				if (IsPrimitive) {
 					switch (Name) {
 					case "Byte":
 						return "byte";
-					case "Sbyte":
+					case "SByte":
 						return "sbyte";
 					case "Char":
 						return "char";
@@ -588,10 +586,10 @@ namespace Mono.Debugger.Soft
 		}
 
 		/*
-		 * Return a list of source files without path info, where methods of 
-		 * this type are defined. Return an empty list if the information is not 
-		 * available. 
-		 * This can be used by a debugger to find out which types occur in a 
+		 * Return a list of source files without path info, where methods of
+		 * this type are defined. Return an empty list if the information is not
+		 * available.
+		 * This can be used by a debugger to find out which types occur in a
 		 * given source file, to filter the list of methods whose locations
 		 * have to be checked when placing breakpoints.
 		 */
@@ -651,7 +649,7 @@ namespace Mono.Debugger.Soft
 		{
 			return GetInfo ().is_valuetype;
 		}
-		
+
 		protected virtual bool IsContextfulImpl ()
 		{
 			// FIXME:
@@ -726,14 +724,14 @@ namespace Mono.Debugger.Soft
 					flags &= ~BindingFlags.IgnoreCase;
 					ignoreCase = true;
 				}
-				
+
 				if (flags == BindingFlags.Default)
 					flags = BindingFlags.Public|BindingFlags.NonPublic|BindingFlags.Instance|BindingFlags.Static;
-				
+
 				MethodAttributes access = (MethodAttributes) 0;
 				bool matchInstance = false;
 				bool matchStatic = false;
-				
+
 				if ((flags & BindingFlags.NonPublic) != 0) {
 					access |= MethodAttributes.Private;
 					flags &= ~BindingFlags.NonPublic;
@@ -750,18 +748,18 @@ namespace Mono.Debugger.Soft
 					flags &= ~BindingFlags.Static;
 					matchStatic = true;
 				}
-				
+
 				if ((int) flags != 0)
 					throw new NotImplementedException ();
-				
+
 				var res = new List<MethodMirror> ();
 				foreach (MethodMirror m in GetMethods ()) {
 					if ((m.Attributes & access) == (MethodAttributes) 0)
 						continue;
-					
+
 					if (!((matchStatic && m.IsStatic) || (matchInstance && !m.IsStatic)))
 						continue;
-					
+
 					if ((!ignoreCase && m.Name == name) || (ignoreCase && m.Name.Equals (name, StringComparison.CurrentCultureIgnoreCase)))
 						res.Add (m);
 				}
@@ -774,12 +772,17 @@ namespace Mono.Debugger.Soft
 		}
 
 		public InvokeResult EndInvokeMethodWithResult (IAsyncResult asyncResult) {
-			return  ObjectMirror.EndInvokeMethodInternalWithResult (asyncResult);
+			return ObjectMirror.EndInvokeMethodInternalWithResult (asyncResult);
 		}
 
 		// Since protocol version 2.31
 		public Value NewInstance () {
 			return vm.GetObject (vm.conn.Type_CreateInstance (id));
+		}
+
+		// Since protocol version 2.46
+		public int GetValueSize () {
+			return vm.conn.Type_GetValueSize (id);
 		}
 
 		// Since protocol version 2.11

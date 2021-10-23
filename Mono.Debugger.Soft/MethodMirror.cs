@@ -62,9 +62,10 @@ namespace Mono.Debugger.Soft
 				sb.Append(Name);
 				sb.Append(" ");
 				sb.Append("(");
-				for (var i = 0; i < param_info.Length; i++) {
-					sb.Append(param_info[i].ParameterType.Name);
-					if (i != param_info.Length - 1)
+				var parameters = GetParameters ();
+				for (var i = 0; i < parameters.Length; i++) {
+					sb.Append(parameters[i].ParameterType.Name);
+					if (i != parameters.Length - 1)
 						sb.Append(", ");
 				}
 				sb.Append(")");
@@ -105,7 +106,7 @@ namespace Mono.Debugger.Soft
 		MethodInfo GetInfo () {
 			if (info == null)
 				info = vm.conn.Method_GetInfo (id);
-			
+
 			return info;
 		}
 
@@ -121,7 +122,7 @@ namespace Mono.Debugger.Soft
 			}
 		}
 
-		public bool IsPublic { 
+		public bool IsPublic {
 			get {
 				return (Attributes & MethodAttributes.MemberAccessMask) == MethodAttributes.Public;
 			}
@@ -368,7 +369,7 @@ namespace Mono.Debugger.Soft
 				}
 				return locations;
 			}
-		}				
+		}
 
 		internal int il_offset_to_line_number (int il_offset, out string src_file, out byte[] src_hash, out int column_number, out int end_line_number, out int end_column_number) {
 			if (debug_info == null)

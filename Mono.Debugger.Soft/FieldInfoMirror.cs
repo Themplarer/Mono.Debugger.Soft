@@ -13,12 +13,14 @@ namespace Mono.Debugger.Soft
 		FieldAttributes attrs;
 		CustomAttributeDataMirror[] cattrs;
 		bool inited;
+		int len_fixed_size_array;
 
 		public FieldInfoMirror (TypeMirror parent, long id, string name, TypeMirror type, FieldAttributes attrs) : base (parent.VirtualMachine, id) {
 			this.parent = parent;
 			this.name = name;
 			this.type = type;
 			this.attrs = attrs;
+			this.len_fixed_size_array = -1;
 			inited = true;
 		}
 
@@ -71,20 +73,20 @@ namespace Mono.Debugger.Soft
 		public bool IsLiteral
 		{
 			get {return (Attributes & FieldAttributes.Literal) != 0;}
-		} 
+		}
 
 		public bool IsStatic
 		{
 			get {return (Attributes & FieldAttributes.Static) != 0;}
-		} 
+		}
 
 		public bool IsInitOnly
 		{
 			get {return (Attributes & FieldAttributes.InitOnly) != 0;}
 		}
- 
+
 		public Boolean IsPublic
-		{ 
+		{
 			get
 			{
 				return (Attributes & FieldAttributes.FieldAccessMask) == FieldAttributes.Public;
@@ -154,6 +156,28 @@ namespace Mono.Debugger.Soft
 			}
 		}
 
+		public int FixedSize
+		{
+			get
+			{
+				if (len_fixed_size_array == -1) {
+					if (!vm.Version.AtLeast (2, 53) || !type.IsValueType) {
+						len_fixed_size_array = 0;
+					}
+					else {
+						var fbas = this.GetCustomAttributes (true);
+						for (int j = 0 ; j < fbas.Length; ++j) {
+							if (fbas [j].Constructor.DeclaringType.FullName.Equals("System.Runtime.CompilerServices.FixedBufferAttribute")){
+								len_fixed_size_array  = (int) fbas [j].ConstructorArguments[1].Value;
+								break;
+							}
+						}
+					}
+				}
+				return len_fixed_size_array;
+			}
+		}
+
 		public CustomAttributeDataMirror[] GetCustomAttributes (bool inherit) {
 			return GetCAttrs (null, inherit);
 		}
@@ -192,4 +216,3 @@ namespace Mono.Debugger.Soft
 		}
 	}
 }
-
