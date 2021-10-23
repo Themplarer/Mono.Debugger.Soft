@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Reflection;
+
+#if ENABLE_CECIL
 using C = Mono.Cecil;
-using Mono.Cecil.Metadata;
+#endif
 
 namespace Mono.Debugger.Soft
 {
@@ -14,7 +16,6 @@ namespace Mono.Debugger.Soft
 		MethodInfo info;
 		TypeMirror declaring_type;
 		DebugInfo debug_info;
-		C.MethodDefinition meta;
 		CustomAttributeDataMirror[] cattrs;
 		ParameterInfoMirror[] param_info;
 		ParameterInfoMirror ret_param;
@@ -24,6 +25,10 @@ namespace Mono.Debugger.Soft
 		MethodBodyMirror body;
 		MethodMirror gmd;
 		TypeMirror[] type_args;
+
+#if ENABLE_CECIL
+		C.MethodDefinition meta;
+#endif
 
 		internal MethodMirror (VirtualMachine vm, long id) : base (vm, id) {
 		}
@@ -65,9 +70,10 @@ namespace Mono.Debugger.Soft
 				sb.Append(Name);
 				sb.Append(" ");
 				sb.Append("(");
-				for (var i = 0; i < param_info.Length; i++) {
-					sb.Append(param_info[i].ParameterType.Name);
-					if (i != param_info.Length - 1)
+				var parameters = GetParameters ();
+				for (var i = 0; i < parameters.Length; i++) {
+					sb.Append(parameters[i].ParameterType.Name);
+					if (i != parameters.Length - 1)
 						sb.Append(", ");
 				}
 				sb.Append(")");
@@ -93,8 +99,10 @@ namespace Mono.Debugger.Soft
 		}
 
 		CustomAttributeDataMirror[] GetCAttrs (TypeMirror type, bool inherit) {
+#if ENABLE_CECIL
 			if (cattrs == null && meta != null && !Metadata.HasCustomAttributes)
 				cattrs = new CustomAttributeDataMirror [0];
+#endif
 
 			// FIXME: Handle inherit
 			if (cattrs == null) {
@@ -417,6 +425,7 @@ namespace Mono.Debugger.Soft
 			return null;
 		}
 
+#if ENABLE_CECIL
 		public C.MethodDefinition Metadata {
 			get {
 				if (meta == null)
@@ -424,6 +433,7 @@ namespace Mono.Debugger.Soft
 				return meta;
 			}
 		}
+#endif
 
 		//
 		// Evaluate the method on the client using an IL interpreter.
