@@ -670,9 +670,8 @@ namespace Mono.Debugger.Soft
 
 		internal Value DecodeValue (ValueImpl v, Dictionary<int, Value> parent_vtypes) {
 			if (v.Value != null) {
-				//TODO: implement PointerValue
-				//if (Version.AtLeast (2, 46) && (v.Type == ElementType.Ptr || v.Type == ElementType.FnPtr))
-					//return new PointerValue(this, GetType(v.Klass), (long)v.Value);
+				if (Version.AtLeast (2, 46) && (v.Type == ElementType.Ptr || v.Type == ElementType.FnPtr))
+					return new PointerValue(this, GetType(v.Klass), (long)v.Value);
 				return new PrimitiveValue (this, v.Type, v.Value);
 			}
 
