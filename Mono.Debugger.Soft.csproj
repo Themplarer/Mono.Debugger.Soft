@@ -6,7 +6,6 @@
     <NoWarn>1699</NoWarn>
     <NoConfig>True</NoConfig>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>dnSpy.Mono.Debugger.Soft.snk</AssemblyOriginatorKeyFile>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
